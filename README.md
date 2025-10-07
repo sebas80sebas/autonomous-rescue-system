@@ -168,15 +168,6 @@ robotics-project/
 
 ---
 
-## 📹 Supplementary Material
-
-Google Drive folder with videos and screenshots of all scenarios:
-[Drive Link](https://drive.google.com/drive/u/0/folders/150ycpwULFLQwNxb68UjKvmoejK9mr7B8)
-
-Includes exhaustive tests with different initial orientations to validate system robustness.
-
----
-
 ## 🔮 Future Work
 
 - Improve precision of movement and orientation functions
@@ -191,9 +182,14 @@ Includes exhaustive tests with different initial orientations to validate system
 
 Academic Project - Universidad Carlos III de Madrid © 2024-2025
 
+The code is provided for educational and reference purposes only.
+
+**Exception:** The Makefile uses Apache License 2.0 (Copyright 1996-2020 Cyberbotics Ltd.)
+
+
 ---
 
 ## 📧 Contact
 
 - Álvaro Cabrera Nieto: 100472152@alumnos.uc3m.es
-- Iván Sebastián Loor Weir: 100448737@alumnos.uc3m.es
+- Iván Sebastián Loor Weir: 100448737@alumnos.uc3m.es || sebas80sebas@gmail.com
