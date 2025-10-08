@@ -38,13 +38,13 @@ MyRobot::MyRobot() : Robot()
 	_left_wheel_sensor->enable(timeStep);
 	_right_wheel_sensor->enable(timeStep);
 
-	// Inicialización de las variables de distancia total recorrida
+	// Initialization of total distance traveled variables
     previous_left_position = 0.0;
     previous_right_position = 0.0;
     total_distance = 0.0;
 
 	
-	// Visto desde arriba, ds0 es el frontal, ds1 está a la izda. de ds0, ds2 está a la izda. de ds1, ..., ds15 está a la dcha. de ds0
+	// Viewed from above, ds0 is frontal, ds1 is to the left of ds0, ds2 is to the left of ds1, ..., ds15 is to the right of ds0
 	const char *ds_name[16] = {"ds0", "ds1" ,"ds2", "ds3", "ds4", "ds5", "ds6", "ds7", "ds8", "ds9", "ds10", "ds11", "ds12","ds13", "ds14", "ds15"};
 	for (int ind = 0; ind < 16; ind++){
 		_distance_sensor[ind] = getDistanceSensor(ds_name[ind]); 
@@ -93,29 +93,29 @@ MyRobot::~MyRobot()
 
 void MyRobot::run()
 {
-    // //////////////////////////////////////// INICIALIZACIÓN ////////////////////////////////////////
+    // //////////////////////////////////////// INITIALIZATION ////////////////////////////////////////
 
-    const double orientationTolerance = 0.05;       // Tolerancia para permitir cierta flexibilidad
+    const double orientationTolerance = 0.05;       // Tolerance to allow some flexibility
 
-    // Definir los posibles estados del robot (comportamiento inicial)
+    // Define possible robot states (initial behavior)
     enum RobotState {
-        TO_NEG_Z,       // Girar hacia el eje negativo Z
-        MOVE_TO_CRASH_Z, // Avanzar hasta chocar (después de orientarse hacia -Z)
-        TO_POS_X,       // Girar hacia el eje positivo X
-        MOVE_TO_CRASH_X, // Avanzar hasta chocar (después de orientarse hacia +X)
-        TO_NEG_X,       // Girar hacia el eje negativo X
-        FINISHED        // Estado final
+        TO_NEG_Z,       // Turn towards negative Z axis
+        MOVE_TO_CRASH_Z, // Move forward until crash (after orienting towards -Z)
+        TO_POS_X,       // Turn towards positive X axis
+        MOVE_TO_CRASH_X, // Move forward until crash (after orienting towards +X)
+        TO_NEG_X,       // Turn towards negative X axis
+        FINISHED        // Final state
     };
 
-    // Variable global para almacenar el estado actual
+    // Global variable to store current state
     RobotState currentState = TO_NEG_Z;
 
-    // Orientaciones objetivo para cada dirección
-    const double orientationNegZ[3] = {0, 0, -1};  // Hacia el eje negativo Z
-    const double orientationPosX[3] = {1, 0, 0};   // Hacia el eje positivo X
-    const double orientationNegX[3] = {-1, 0, 0};  // Hacia el eje negativo X
+    // Target orientations for each direction
+    const double orientationNegZ[3] = {0, 0, -1};  // Towards negative Z axis
+    const double orientationPosX[3] = {1, 0, 0};   // Towards positive X axis
+    const double orientationNegX[3] = {-1, 0, 0};  // Towards negative X axis
 
-    // Variable para almacenar el tiempo de inicio del giro
+    // Variable to store turn start time
     double turn_start_time = 0;
 
     // New enum to include scenario detection state
@@ -125,18 +125,18 @@ void MyRobot::run()
         SCENARIO_02,			// Specific handling for scenario 02
         SCENARIO_03,			// Specific handling for scenario 03
         SCENARIO_04,			// Specific handling for scenario 04
-        SCENARIO_05,			// Specific handling for scenario 05 (caso 0)
-        SCENARIO_05_1,			// Specific handling for scenario 05 (caso 1)
+        SCENARIO_05,			// Specific handling for scenario 05 (case 0)
+        SCENARIO_05_1,			// Specific handling for scenario 05 (case 1)
         SCENARIO_06,			// Specific handling for scenario 06
         SCENARIO_07,			// Specific handling for scenario 07
         SCENARIO_08,			// Specific handling for scenario 08
         SCENARIO_09,			// Specific handling for scenario 09
         SCENARIO_10,			// Specific handling for scenario 10
-        DET_01_08_10,			// Deteccion de Escenarios 01, 08 y 10
-        SCENARIO_01_08_10,		// Control de Escenarios 01, 08 y 10
-        DET_04_05_06_07,		// Deteccion de Escenarios 04, 05, 06 y 07
-        SCENARIO_04_05_06_07,	// Control de Escenarios 04, 05, 06 y 07
-        DET_SCENARIO_05			// Deteccion de Escenarios 05_1
+        DET_01_08_10,			// Detection of Scenarios 01, 08 and 10
+        SCENARIO_01_08_10,		// Control of Scenarios 01, 08 and 10
+        DET_04_05_06_07,		// Detection of Scenarios 04, 05, 06 and 07
+        SCENARIO_04_05_06_07,	// Control of Scenarios 04, 05, 06 and 07
+        DET_SCENARIO_05			// Detection of Scenario 05_1
     };
 
     // Global scenario state variable
@@ -152,14 +152,14 @@ void MyRobot::run()
 
     // Color Scenario 09 
     const std::tuple<int, int, int> SCENARIO_09_COLOR = {210, 250, 250};	
-    // Color Scenario 01, 08 , 10
+    // Color Scenario 01, 08, 10
     const std::tuple<int, int, int> Color01_08_10 = {40, 110, 110};
     // Color Scenario 04, 05, 06, 07
     const std::tuple<int, int, int> Color04_05_06_07 = {40, 100, 100};
     // Color Scenario 06
     const std::tuple<int, int, int> Color06 = {90, 190, 190};
 
-	// //////////////////////////////////////// BUCLE PRINCIPAL ////////////////////////////////////////
+	// //////////////////////////////////////// MAIN LOOP ////////////////////////////////////////
 
 	// Main loop:
 	// - perform simulation steps until Webots is stopping the controller
@@ -169,32 +169,32 @@ void MyRobot::run()
 		// Enter here functions to read sensor data, like:
 		//  double val = ds->getValue();
 
-		// Calcular la distancia total recorrida
-		// Calcular distancia recorrida en este paso
+		// Calculate total distance traveled
+		// Calculate distance traveled in this step
         double current_left_position = _left_wheel_sensor->getValue();
         double current_right_position = _right_wheel_sensor->getValue();
 
-		// Calcular el ángulo recorrido por cada rueda (en radianes)
+		// Calculate angle traveled by each wheel (in radians)
         double delta_left = current_left_position - previous_left_position;
         double delta_right = current_right_position - previous_right_position;
 
-		// Calcular la distancia recorrida por cada rueda (radio * ángulo)
+		// Calculate distance traveled by each wheel (radius * angle)
         double distance_left = delta_left * WHEEL_RADIUS;
         double distance_right = delta_right * WHEEL_RADIUS;
 
-		// Distancia promedio recorrida en este paso
+		// Average distance traveled in this step
         double distance_step = (distance_left + distance_right) / 2.0;
 
-		// Acumular en la distancia total
+		// Accumulate in total distance
         total_distance += distance_step;
 
-		// Actualizar posiciones anteriores
+		// Update previous positions
         previous_left_position = current_left_position;
         previous_right_position = current_right_position;
 
-		std::cout << "Distancia total recorrida: " << total_distance << " metros" << std::endl;
+		std::cout << "Total distance traveled: " << total_distance << " meters" << std::endl;
 
-		// DEBUG: imprimir currentState
+		// DEBUG: print currentState
 		std::cout << "Current state: " << currentState << std::endl;
 
 		// testing compass
@@ -206,9 +206,9 @@ void MyRobot::run()
 			std::cout << "Compass values are NULL" << std::endl;
 		}
 
-		// Comprobar sensores de distancia para depuración
+		// Check distance sensors for debugging
 		for (int ind = 0; ind < 16; ind++) {
-			if (_distance_sensor[ind]->getValue() > 80.0) {  // Mostrar solo lecturas significativas
+			if (_distance_sensor[ind]->getValue() > 80.0) {  // Show only significant readings
 				std::cout << "DS" << ind << ": " << _distance_sensor[ind]->getValue() << std::endl;
 			}
 		}
@@ -270,33 +270,33 @@ void MyRobot::run()
 					<< sortedColors[i].second << " pixels]" << std::endl;
 		}
 
-        // Después de ordenar los colores por ocurrencia y antes del switch de estado:
+        // After sorting colors by occurrence and before the state switch:
   
-        // Vectores para almacenar los colores y conteos para detect_scenario
+        // Vectors to store colors and counts for detect_scenario
         std::vector<std::tuple<int, int, int>> dominant_colors;
         std::vector<int> pixel_counts;
         
-        // Llenar los vectores con los datos de los colores dominantes
+        // Fill vectors with dominant color data
         for (int i = 0; i < std::min(5, (int)sortedColors.size()); i++) {
             dominant_colors.push_back(sortedColors[i].first);
             pixel_counts.push_back(sortedColors[i].second);
         }
         
-        // Detectar el escenario
+        // Detect the scenario
         std::string scenario = detect_scenario(dominant_colors, pixel_counts);
         
-        // Indicar el modo de escenario correspondiente si se detecta uno
+        // Indicate corresponding scenario mode if one is detected
         if (scenario != "unknown") {
            
             if (scenario == "04y05y06y07") {
-                std::cout << "Es un escenario entre el 04, el 05, el 06 y el 07" << std::endl;
+                std::cout << "It's a scenario between 04, 05, 06 and 07" << std::endl;
                 
                 isScenario04y05y06y07Detected = true;
                 
             }
             else if (scenario == "01y08y10") {
                 
-                std::cout << "Es un escenario entre el 01, el 08 y el 10" << std::endl;
+                std::cout << "It's a scenario between 01, 08 and 10" << std::endl;
                 
                 isScenario01y08y10Detected = true;
                 
@@ -304,7 +304,7 @@ void MyRobot::run()
             
             else if (scenario == "02") {
                 
-                std::cout << "Es el escenario 2" << std::endl;
+                std::cout << "It's scenario 2" << std::endl;
                 
                 isScenario02Detected = true;
                 
@@ -312,7 +312,7 @@ void MyRobot::run()
             
             else if (scenario == "05") {
                 
-                std::cout << "Es el escenario 5" << std::endl;
+                std::cout << "It's scenario 5" << std::endl;
                 
                 isScenario05Detected = true;
                 
@@ -331,92 +331,92 @@ void MyRobot::run()
 
             case DEFAULT_NAVIGATION:
 
-				// //////////////////////////////////////// COMIENZO DEL PROGRAMA ////////////////////////////////////////
-				// Al principio, el robot debe girar para orientarse hacia el eje negativo Z
-				// Después, avanzar rápidamente hasta chocarse
-				// Tras ello, el robot debe girar para orientarse hacia el eje positivo X
-				// A continuación, avanzar rápidamente hasta chocarse
-				// Finalmente, el robot debe girar para orientarse hacia el eje negativo X
+				// //////////////////////////////////////// PROGRAM START ////////////////////////////////////////
+				// At the beginning, the robot must turn to orient towards the negative Z axis
+				// Then, move forward quickly until collision
+				// After that, the robot must turn to orient towards the positive X axis
+				// Next, move forward quickly until collision
+				// Finally, the robot must turn to orient towards the negative X axis
 				//
-				// Esto se hace para comenzar a distinguir unos escenarios de otros (colores, muros, huecos, etc.)
+				// This is done to begin distinguishing between different scenarios (colors, walls, gaps, etc.)
 
-				// Máquina de estados
+				// State machine
 				switch (currentState) {
 					case TO_NEG_Z:
-						// Girar hacia el eje negativo Z
+						// Turn towards negative Z axis
 						if (turnToOrientation(this, _compass, _leftMotor, _rightMotor, orientationNegZ, orientationTolerance, timeStep)) {
-							std::cout << "Orientación hacia -Z alcanzada. Avanzando hasta colisión." << std::endl;
-							// Cambiar al siguiente estado
+							std::cout << "Orientation towards -Z reached. Moving forward until collision." << std::endl;
+							// Change to next state
 							currentState = MOVE_TO_CRASH_Z;
-							// Parar
+							// Stop
 							moveForward(_leftMotor, _rightMotor, 0.0);
 
-							// Almacenar el tiempo de final del giro
+							// Store turn end time
 							turn_start_time = getTime();
 						}
 						break;
 						
 					case MOVE_TO_CRASH_Z:
 
-						// Esperar 1 segundo antes de avanzar - damos tiempo a los motores y a las ruedas a estabilizarse
+						// Wait 1 second before moving forward - give time for motors and wheels to stabilize
 						if (getTime() - turn_start_time < 1) {
 							break;
 						}
 
-						// Velocidad máxima para colisión
+						// Maximum speed for collision
 						moveForward(_leftMotor, _rightMotor, 10.0);
 						
-						// Si encuentra el cubo
+						// If cube is found
 						if ((isCollisionDetected(_distance_sensor)) && (getTime() - turn_start_time > 1) && (isScenario05Detected)) {
-							// Detectamos colisión
-							std::cout << "Colisión detectada con Cubo" << std::endl;
-							// Cambiar al siguiente estado
+							// Collision detected
+							std::cout << "Collision detected with Cube" << std::endl;
+							// Change to next state
 							scenarioState = DET_SCENARIO_05;
 							
 							
-							// Detener el robot
+							// Stop the robot
 							stopRobot(_leftMotor, _rightMotor);
 
-							// Almacenar el tiempo de final del choque
+							// Store collision end time
 							turn_start_time = getTime();
 							break;
 						}
 
-						// Avanzar hasta chocar
+						// Move forward until collision
 						if ((isCollisionDetected(_distance_sensor)) && (getTime() - turn_start_time > 1)) {
-							// Detectamos colisión
-							std::cout << "Colisión detectada después de orientarse hacia -Z. Girando hacia +X." << std::endl;
-							// Cambiar al siguiente estado
+							// Collision detected
+							std::cout << "Collision detected after orienting towards -Z. Turning towards +X." << std::endl;
+							// Change to next state
 							currentState = TO_POS_X;
-							// Detener el robot
+							// Stop the robot
 							stopRobot(_leftMotor, _rightMotor);
 
-							// Almacenar el tiempo de final del choque
+							// Store collision end time
 							turn_start_time = getTime();
 						}
 						break;
 						
 					case TO_POS_X:
-						// Esperar 1 segundo antes de avanzar
+						// Wait 1 second before moving forward
 						if (getTime() - turn_start_time < 1) {
 							break;
 						}
 
-						// Girar hacia el eje positivo X
+						// Turn towards positive X axis
 						if (turnToOrientation(this, _compass, _leftMotor, _rightMotor, orientationPosX, orientationTolerance, timeStep)) {
-							std::cout << "Orientación hacia +X alcanzada. Avanzando hasta colisión." << std::endl;
-							// Cambiar al siguiente estado
+							std::cout << "Orientation towards +X reached. Moving forward until collision." << std::endl;
+							// Change to next state
 							currentState = MOVE_TO_CRASH_X;
-							// Parar
+							// Stop
 							moveForward(_leftMotor, _rightMotor, 0.0);
 
-							// Almacenar el tiempo de final del giro
+							// Store turn end time
 							turn_start_time = getTime();
 						}
 						break;
 						
 					case MOVE_TO_CRASH_X:
-						// Esperar 1 segundo antes de avanzar
+						// Wait 1 second before moving forward
 						if (getTime() - turn_start_time < 1) {
 							break;
 						}
@@ -430,25 +430,25 @@ void MyRobot::run()
 						}
 						
 
-						// Velocidad máxima para colisión
+						// Maximum speed for collision
 						moveForward(_leftMotor, _rightMotor, 10.0);
 
-						// Avanzar hasta chocar
+						// Move forward until collision
 						if (isCollisionDetected(_distance_sensor)) {
-							// Detectamos colisión
-							std::cout << "Colisión detectada después de orientarse hacia +X. Girando hacia -X." << std::endl;
-							// Detener el robot
+							// Collision detected
+							std::cout << "Collision detected after orienting towards +X. Turning towards -X." << std::endl;
+							// Stop the robot
 							stopRobot(_leftMotor, _rightMotor);
-							// Cambiar al siguiente estado
+							// Change to next state
 							currentState = TO_NEG_X;
 
-							// Almacenar el tiempo de final del choque
+							// Store collision end time
 							turn_start_time = getTime();
 						}
 						break;
 						
 					case TO_NEG_X:
-						// Esperar 1 segundo antes de avanzar
+						// Wait 1 second before moving forward
 						if (getTime() - turn_start_time < 1) {
 							break;
 						}
@@ -456,7 +456,7 @@ void MyRobot::run()
 						// Check for scenario 03 (pixels with RGB 0,0,0)
 						for (const auto& pair : colorCount) {
 							if (std::get<0>(pair.first) == 0 && std::get<1>(pair.first) == 0 && std::get<2>(pair.first) == 0) {
-								if (pair.second > 1000) { // Umbral mínimo de píxeles negros
+								if (pair.second > 1000) { // Minimum threshold of black pixels
 									std::cout << "Scenario 03 detected! Switching to scenario mode." << std::endl;
 									scenarioState = SCENARIO_03;
 									stopRobot(_leftMotor, _rightMotor);
@@ -465,12 +465,12 @@ void MyRobot::run()
 							}
 						}
 
-						// Girar hacia el eje negativo X
+						// Turn towards negative X axis
 						if (turnToOrientation(this, _compass, _leftMotor, _rightMotor, orientationNegX, orientationTolerance, timeStep)) {
-							std::cout << "Orientación hacia -X alcanzada. Tarea completada." << std::endl;
-							// Cambiar al estado final
+							std::cout << "Orientation towards -X reached. Task completed." << std::endl;
+							// Change to final state
 							currentState = FINISHED;
-							// Detener el robot
+							// Stop the robot
 							stopRobot(_leftMotor, _rightMotor);
 						}
 						
@@ -484,10 +484,10 @@ void MyRobot::run()
 						if (isScenario02Detected) {
 							
 							if (turnToOrientation(this, _compass, _leftMotor, _rightMotor, orientationNegX, orientationTolerance, timeStep)) {
-                                      					std::cout << "Orientación hacia +Z alcanzada. Tarea completada." << std::endl;
+                                      					std::cout << "Orientation towards +Z reached. Task completed." << std::endl;
                                       					moveForward(_leftMotor, _rightMotor, 0.0);
                                       					scenarioState = SCENARIO_02;                                                                                            
-                                      					// Almacenar el tiempo de final del giro					
+                                      					// Store turn end time					
                                       					turn_start_time = getTime();
                         	}
 							
@@ -504,31 +504,32 @@ void MyRobot::run()
 						break;
 						
 					case FINISHED:
-						// Mantener al robot detenido
+						// Keep robot stopped
 						stopRobot(_leftMotor, _rightMotor);
 						break;
 				}
                 break;
 
-			//////////// Control de Posibles Escenarios 01, 08 y 10 ////////////
+			//////////// Control of Possible Scenarios 01, 08 and 10 ////////////
 			case SCENARIO_01_08_10:
                 // Specific handling for scenario 01_08_10
-                std::cout << "Detectando que escenario es: (01, 08 o 10)" << std::endl;
+                std::cout << "Detecting which scenario: (01, 08 or 10)" << std::endl;
 
-				// Damos la vuelta al robot para que pueda verificar a que escenario pertenece en el estado siguiente
+				// Turn robot around so it can verify which scenario it belongs to in next state
 				if (turnToOrientation(this, _compass, _leftMotor, _rightMotor, orientationNegX, orientationTolerance, timeStep)) {
-					std::cout << "Orientación hacia +Z alcanzada. Tarea completada." << std::endl;
+					std::cout << "Orientation towards +Z reached. Task completed." << std::endl;
 
 					moveForward(_leftMotor, _rightMotor, 0.0);
 
-					scenarioState = DET_01_08_10;					// Almacenar el tiempo de final del giro
-								turn_start_time = getTime();
+					scenarioState = DET_01_08_10;					
+					// Store turn end time
+					turn_start_time = getTime();
 
 				}			              
                 
                 break;
 			
-			//////////// Detección de Posibles Escenarios 01, 08 y 10 ////////////	
+			//////////// Detection of Possible Scenarios 01, 08 and 10 ////////////	
 			case DET_01_08_10:  
                 // Specific handling for scenarios 01, 08 and 10
                 
@@ -536,14 +537,14 @@ void MyRobot::run()
 					break;
 				}
 
-				// Avanza el robot para tratar de detectar el escenario correcto
+				// Move robot forward to try to detect correct scenario
 				moveForward(_leftMotor, _rightMotor, 10.0);
 				
-				// Si el color Color01_08_10 = (40, 110, 110)  es estable y supera los 14000 pixeles  
-				// estamos en el escenario 08, sino tendriamos que detectar si estamos 
-				// escenario 01 o 10
+				// If color Color01_08_10 = (40, 110, 110) is stable and exceeds 14000 pixels  
+				// we are in scenario 08, otherwise we need to detect if we are in 
+				// scenario 01 or 10
 				if (colorCount[Color01_08_10] > 14000) { 
-					std::cout << "Escenario 08" << std::endl;
+					std::cout << "Scenario 08" << std::endl;
 					
 					stopRobot(_leftMotor, _rightMotor);
 					
@@ -551,11 +552,11 @@ void MyRobot::run()
 					
 				} else if ((_distance_sensor[0]->getValue() > 900) && (colorCount[Color01_08_10] < 14000)) {
 					
-					// Si se activa el sensor DS6 estamos en el escenario 1, sino en el escenario 10
+					// If DS6 sensor is activated we are in scenario 1, otherwise in scenario 10
 					
 					if (_distance_sensor[6]->getValue() > 0) {
 					
-					std::cout << "Escenario 01" << std::endl;
+					std::cout << "Scenario 01" << std::endl;
 					
 					stopRobot(_leftMotor, _rightMotor);
 					
@@ -563,7 +564,7 @@ void MyRobot::run()
 					
 					} else {
 					
-					std::cout << "Escenario 10" << std::endl;
+					std::cout << "Scenario 10" << std::endl;
 					
 					stopRobot(_leftMotor, _rightMotor);
 					
@@ -575,14 +576,14 @@ void MyRobot::run()
                 break;
 
 
-			//////////// Control de Posibles Escenarios 04, 05, 06 y 07 ////////////
+			//////////// Control of Possible Scenarios 04, 05, 06 and 07 ////////////
 			case SCENARIO_04_05_06_07:
                 // Specific handling for scenario 04_05_06_07
-                std::cout << "Detectando que escenario es: (04, 05, 06 o 07)" << std::endl;
+                std::cout << "Detecting which scenario: (04, 05, 06 or 07)" << std::endl;
 
-				// Damos la vuelta al robot para que pueda verificar a que escenario pertenece en el estado siguiente
+				// Turn robot around so it can verify which scenario it belongs to in next state
 				if (turnToOrientation(this, _compass, _leftMotor, _rightMotor, orientationNegX, orientationTolerance, timeStep)) {
-					std::cout << "Orientación hacia +Z alcanzada. Tarea completada." << std::endl;
+					std::cout << "Orientation towards +Z reached. Task completed." << std::endl;
 
 					moveForward(_leftMotor, _rightMotor, 0.0);
 
@@ -594,7 +595,7 @@ void MyRobot::run()
                 break;
 
 
-			//////////// Detección de Posibles Escenarios 04, 05, 06 y 07 ////////////
+			//////////// Detection of Possible Scenarios 04, 05, 06 and 07 ////////////
 			case DET_04_05_06_07:  
                 // Specific handling for scenarios 04, 05, 06 and 07
                 
@@ -602,43 +603,43 @@ void MyRobot::run()
 					break;
 				}
 
-				// Avanza el robot para tratar de detectar el escenario correcto
+				// Move robot forward to try to detect correct scenario
 	     		moveForward(_leftMotor, _rightMotor, 10.0);
 				
-				// Si el color Color04_05_06_07 es estable y supera los 38000 píxeles, puede ser el escenario 04 o 05
+				// If Color04_05_06_07 is stable and exceeds 38000 pixels, it could be scenario 04 or 05
 				if (colorCount[Color04_05_06_07] > 38000) { 
-					std::cout << "Escenario 04 o 05" << std::endl;
+					std::cout << "Scenario 04 or 05" << std::endl;
 
-					// Si el sensor de distancia DS2 detecta un valor mayor a 740, es el escenario 05
+					// If distance sensor DS2 detects value greater than 740, it's scenario 05
 					if (_distance_sensor[2]->getValue() > 740) {
 								
-						std::cout << "Escenario 05" << std::endl;
+						std::cout << "Scenario 05" << std::endl;
 								
 						stopRobot(_leftMotor, _rightMotor);
 						scenarioState = SCENARIO_05;
 					
-					// Si DS2 detecta menos de 740, es el escenario 04
+					// If DS2 detects less than 740, it's scenario 04
 					} else if (_distance_sensor[2]->getValue() < 740) {
 								
-						std::cout << "Escenario 04" << std::endl;
+						std::cout << "Scenario 04" << std::endl;
 								
 						stopRobot(_leftMotor, _rightMotor);
 						scenarioState = SCENARIO_04;
 					}								
 				
-				// Si el Color04_05_06_07 no supera los 38000 píxeles y se detecta el color del escenario 06 (>14600), 
-				// estamos en escenario 06 o 07	inicialmente
+				// If Color04_05_06_07 doesn't exceed 38000 pixels and scenario 06 color is detected (>14600), 
+				// we are initially in scenario 06 or 07	
 	     		} else if ((colorCount[Color04_05_06_07] < 38000) && (colorCount[Color06] > 14600)){
-					// Si al avanzar, el sensor DS6 no detecta obstáculo y la cantidad de color del escenario 06 supera 15367, 
-					// es el escenario 06
+					// If moving forward, DS6 sensor doesn't detect obstacle and scenario 06 color exceeds 15367, 
+					// it's scenario 06
                     if ((_distance_sensor[6]->getValue() == 0) && (colorCount[Color06] > 15367)) {
-						std::cout << "Escenario 06" << std::endl;
+						std::cout << "Scenario 06" << std::endl;
 						scenarioState = SCENARIO_06;		
 						stopRobot(_leftMotor, _rightMotor);
 
-					// Si al avanzar, la cantidad de color del escenario 06 es menor de 15050, entonces es el escenario 07
+					// If moving forward, scenario 06 color is less than 15050, then it's scenario 07
 					} else if (colorCount[Color06] < 15050) {
-						std::cout << "Escenario 07" << std::endl;
+						std::cout << "Scenario 07" << std::endl;
 						scenarioState = SCENARIO_07;				
 						stopRobot(_leftMotor, _rightMotor);
 					}
@@ -646,14 +647,14 @@ void MyRobot::run()
 	     
                 break;
 
-			//////////// Control de Escenario 05_1 ////////////
+			//////////// Control of Scenario 05_1 ////////////
 			case DET_SCENARIO_05:  
 				// Specific handling for scenario 05_1
-                std::cout << "Escenario 05" << std::endl; 
+                std::cout << "Scenario 05" << std::endl; 
 
-				// Damos la vuelta al robot para que actue bajo el escenario 05_1 
+				// Turn robot around to act under scenario 05_1 
                 if (turnToOrientation(this, _compass, _leftMotor, _rightMotor, orientationNegX, orientationTolerance, timeStep)) {
-					std::cout << "Orientación hacia +Z alcanzada. Tarea completada." << std::endl;
+					std::cout << "Orientation towards +Z reached. Task completed." << std::endl;
 					moveForward(_leftMotor, _rightMotor, 0.0);
 
 					scenarioState = SCENARIO_05_1;					
@@ -663,7 +664,7 @@ void MyRobot::run()
 				break;
 
 
-			// //////////////////////////////////////// ESCENARIO 01 ////////////////////////////////////////
+			// //////////////////////////////////////// SCENARIO 01 ////////////////////////////////////////
 			case SCENARIO_01:
                 // Specific handling for scenario 1
                 static std::vector<MovementStep> scenario01Sequence = {
@@ -693,24 +694,7 @@ void MyRobot::run()
 					{MovementStep::MOVE_FORWARD, 9.0},
 					{MovementStep::WAIT, 0.15},
 
-					{MovementStep::TURN_RIGHT, 90.0},	// Ha encontrado el primer robot; dar una vuelta completa
-					{MovementStep::WAIT, 0.01},
-					{MovementStep::TURN_RIGHT, 90.0},
-					{MovementStep::WAIT, 0.01},
-					{MovementStep::TURN_RIGHT, 90.0},
-					{MovementStep::WAIT, 0.01},
-					{MovementStep::TURN_RIGHT, 90.0},
-					{MovementStep::WAIT, 0.15},
-					{MovementStep::TURN_LEFT, 100.0},
-					{MovementStep::WAIT, 0.15},
-					{MovementStep::MOVE_FORWARD, 4.5},
-					{MovementStep::WAIT, 0.15},
-
-					{MovementStep::TURN_RIGHT, 90.0},	// Ha encontrado el segundo robot; dar una vuelta completa
-					{MovementStep::WAIT, 0.01},
-					{MovementStep::TURN_RIGHT, 90.0},
-					{MovementStep::WAIT, 0.01},
-					{MovementStep::TURN_RIGHT, 90.0},
+					{MovementStep::TURN_RIGHT, 90.0},	// Found first robot; make complete turn
 					{MovementStep::WAIT, 0.01},
 					{MovementStep::TURN_RIGHT, 90.0},
 					{MovementStep::WAIT, 0.01},
@@ -741,18 +725,18 @@ void MyRobot::run()
 				
 				std::cout << "Executing scenario 01 movement sequence. Step: " << currentStepIndex_1 << std::endl;
 				
-				// Ejecutar la secuencia de movimientos
+				// Execute movement sequence
 				if (executeMovementSequence(this, _leftMotor, _rightMotor, _compass, 
 					scenario01Sequence, currentStepIndex_1, stepStartTime_1, timeStep)) {
-					// Secuencia completada
+					// Sequence completed
 					std::cout << "Scenario 01 movement sequence completed." << std::endl;
-					// Aquí podrías agregar más lógica o cambiar a otro estado
+					// Here you could add more logic or change to another state
 					stopRobot(_leftMotor, _rightMotor);
 				}
 				break;
 
 
-			// //////////////////////////////////////// ESCENARIO 02 ////////////////////////////////////////	
+			// //////////////////////////////////////// SCENARIO 02 ////////////////////////////////////////	
 			case SCENARIO_02:
                 // Specific handling for scenario 02
 				if (getTime() - turn_start_time < 1) {
@@ -785,7 +769,7 @@ void MyRobot::run()
 					{MovementStep::MOVE_FORWARD, 6.0},
 					{MovementStep::WAIT, 0.15},
 
-					{MovementStep::TURN_RIGHT, 90.0},	// Ha encontrado el primer robot; dar una vuelta completa
+					{MovementStep::TURN_RIGHT, 90.0},	// Found first robot; make complete turn
 					{MovementStep::WAIT, 0.01},
 					{MovementStep::TURN_RIGHT, 90.0},
 					{MovementStep::WAIT, 0.01},
@@ -796,7 +780,7 @@ void MyRobot::run()
 					{MovementStep::MOVE_FORWARD, 3.0},
 					{MovementStep::WAIT, 0.15}, 
 
-					{MovementStep::TURN_RIGHT, 90.0},	// Ha encontrado el segundo robot; dar una vuelta completa
+					{MovementStep::TURN_RIGHT, 90.0},	// Found second robot; make complete turn
 					{MovementStep::WAIT, 0.01},
 					{MovementStep::TURN_RIGHT, 90.0},
 					{MovementStep::WAIT, 0.01},
@@ -826,25 +810,25 @@ void MyRobot::run()
 				
       	     	std::cout << "Executing scenario 02 movement sequence. Step: " << currentStepIndex_2 << std::endl;
 				
-				// Ejecutar la secuencia de movimientos
+				// Execute movement sequence
 				if (executeMovementSequence(this, _leftMotor, _rightMotor, _compass, 
 					scenario02Sequence, currentStepIndex_2, stepStartTime_2, timeStep)) {
-					// Secuencia completada
+					// Sequence completed
 					std::cout << "Scenario 2 movement sequence completed." << std::endl;
-					// Aquí podrías agregar más lógica o cambiar a otro estado
+					// Here you could add more logic or change to another state
 					stopRobot(_leftMotor, _rightMotor);
 				}	
 	     
                 break;
 
 
-			// //////////////////////////////////////// ESCENARIO 03 ////////////////////////////////////////
+			// //////////////////////////////////////// SCENARIO 03 ////////////////////////////////////////
 			case SCENARIO_03:
 				// Specific handling for scenario 03
-				// MovementStep::WAIT - Esperar x segundos; ayuda a estabilizar las ruedas y los motores
-				// MovementStep::MOVE_FORWARD - Avanzar x segundos
-				// MovementStep::TURN_LEFT - Girar a la izquierda (180 - x) grados
-				// MovementStep::TURN_RIGHT - Girar a la derecha (180 - x) grados
+				// MovementStep::WAIT - Wait x seconds; helps stabilize wheels and motors
+				// MovementStep::MOVE_FORWARD - Move forward x seconds
+				// MovementStep::TURN_LEFT - Turn left (180 - x) degrees
+				// MovementStep::TURN_RIGHT - Turn right (180 - x) degrees
                 static std::vector<MovementStep> scenario03Sequence = {
 					{MovementStep::WAIT, 0.15},
 					{MovementStep::TURN_RIGHT, 110.0},
@@ -872,7 +856,7 @@ void MyRobot::run()
 					{MovementStep::MOVE_FORWARD, 6.1},
 					{MovementStep::WAIT, 0.15},
 
-					{MovementStep::TURN_LEFT, 90.0},		// Encontrarse con el primer robot; dar una vuelta completa
+					{MovementStep::TURN_LEFT, 90.0},		// Encounter first robot; make complete turn
 					{MovementStep::WAIT, 0.01},
 					{MovementStep::TURN_LEFT, 90.0},
 					{MovementStep::WAIT, 0.01},
@@ -885,15 +869,15 @@ void MyRobot::run()
 					{MovementStep::MOVE_FORWARD, 6.0},
 					{MovementStep::WAIT, 0.15},
 
-					{MovementStep::TURN_LEFT, 90.0},		// Encontrarse con el segundo robot; dar una vuelta completa
+					{MovementStep::TURN_LEFT, 90.0},		// Encounter second robot; make complete turn
 					{MovementStep::WAIT, 0.01},
 					{MovementStep::TURN_LEFT, 90.0},
 					{MovementStep::WAIT, 0.01},
 					{MovementStep::TURN_LEFT, 90.0},
 					{MovementStep::WAIT, 0.01},
-					{MovementStep::TURN_LEFT, 104.0},		// Ángulo menor porque resbala - por defecto hace más de 360º
+					{MovementStep::TURN_LEFT, 104.0},		// Smaller angle because it slips - by default does more than 360°
 					{MovementStep::WAIT, 0.15},
-					{MovementStep::MOVE_FORWARD, 2.3},		// Volver a la línea de salida
+					{MovementStep::MOVE_FORWARD, 2.3},		// Return to starting line
 					{MovementStep::WAIT, 0.15},
 					{MovementStep::TURN_RIGHT, 95.0},
 					{MovementStep::WAIT, 0.15},
@@ -918,17 +902,17 @@ void MyRobot::run()
 				
 				std::cout << "Executing scenario 03 movement sequence. Step: " << currentStepIndex_3 << std::endl;
 				
-				// Ejecutar la secuencia de movimientos
+				// Execute movement sequence
 				if (executeMovementSequence(this, _leftMotor, _rightMotor, _compass, 
 											scenario03Sequence, currentStepIndex_3, stepStartTime_3, timeStep)) {
-					// Secuencia completada
+					// Sequence completed
 					std::cout << "Scenario 03 movement sequence completed." << std::endl;
-					// Aquí podrías agregar más lógica o cambiar a otro estado
+					// Here you could add more logic or change to another state
 					stopRobot(_leftMotor, _rightMotor);
 				}
 				break;
 			
-			// //////////////////////////////////////// ESCENARIO 04 ////////////////////////////////////////
+			// //////////////////////////////////////// SCENARIO 04 ////////////////////////////////////////
 			case SCENARIO_04:
                 // Specific handling for scenario 04
                 static std::vector<MovementStep> scenario04Sequence = {
@@ -957,7 +941,7 @@ void MyRobot::run()
 					{MovementStep::MOVE_FORWARD, 6.0},
 					{MovementStep::WAIT, 0.15},
 
-					{MovementStep::TURN_RIGHT, 90.0},	// Ha encontrado el primer robot; dar una vuelta completa
+					{MovementStep::TURN_RIGHT, 90.0},	// Found first robot; make complete turn
 					{MovementStep::WAIT, 0.01},
 					{MovementStep::TURN_RIGHT, 90.0},
 					{MovementStep::WAIT, 0.01},
@@ -970,7 +954,7 @@ void MyRobot::run()
 					{MovementStep::MOVE_FORWARD, 1.5},
 					{MovementStep::WAIT, 0.15},
 
-					{MovementStep::TURN_RIGHT, 90.0},	// Ha encontrado el segundo robot; dar una vuelta completa
+					{MovementStep::TURN_RIGHT, 90.0},	// Found second robot; make complete turn
 					{MovementStep::WAIT, 0.01},
 					{MovementStep::TURN_RIGHT, 90.0},
 					{MovementStep::WAIT, 0.01},
@@ -1005,19 +989,19 @@ void MyRobot::run()
 				
 				std::cout << "Executing scenario 04 movement sequence. Step: " << currentStepIndex_4 << std::endl;
 				
-				// Ejecutar la secuencia de movimientos
+				// Execute movement sequence
 				if (executeMovementSequence(this, _leftMotor, _rightMotor, _compass, 
 					scenario04Sequence, currentStepIndex_4, stepStartTime_4, timeStep)) {
-					// Secuencia completada
+					// Sequence completed
 					std::cout << "Scenario 04 movement sequence completed." << std::endl;
-					// Aquí podrías agregar más lógica o cambiar a otro estado
+					// Here you could add more logic or change to another state
 					stopRobot(_leftMotor, _rightMotor);
 				}
 
 				break;
 
 
-			// //////////////////////////////////////// ESCENARIO 05 ////////////////////////////////////////
+			// //////////////////////////////////////// SCENARIO 05 ////////////////////////////////////////
 			case SCENARIO_05:
                 // Specific handling for scenario 05
                 static std::vector<MovementStep> scenario05Sequence = {
@@ -1043,7 +1027,7 @@ void MyRobot::run()
 					{MovementStep::MOVE_FORWARD, 9.0},
 					{MovementStep::WAIT, 0.15},
 
-					{MovementStep::TURN_RIGHT, 90.0},	// Ha encontrado el primer robot; dar una vuelta completa
+					{MovementStep::TURN_RIGHT, 90.0},	// Found first robot; make complete turn
 					{MovementStep::WAIT, 0.01},
 					{MovementStep::TURN_RIGHT, 90.0},
 					{MovementStep::WAIT, 0.01},
@@ -1056,7 +1040,7 @@ void MyRobot::run()
 					{MovementStep::MOVE_FORWARD, 7.5},
 					{MovementStep::WAIT, 0.15},
 
-					{MovementStep::TURN_RIGHT, 90.0},	// Ha encontrado el segundo robot; dar una vuelta completa
+					{MovementStep::TURN_RIGHT, 90.0},	// Found second robot; make complete turn
 					{MovementStep::WAIT, 0.01},
 					{MovementStep::TURN_RIGHT, 90.0},
 					{MovementStep::WAIT, 0.01},
@@ -1091,17 +1075,17 @@ void MyRobot::run()
 				
 				std::cout << "Executing scenario 05 movement sequence. Step: " << currentStepIndex_5 << std::endl;
 				
-				// Ejecutar la secuencia de movimientos
+				// Execute movement sequence
 				if (executeMovementSequence(this, _leftMotor, _rightMotor, _compass, 
 					scenario05Sequence, currentStepIndex_5, stepStartTime_5, timeStep)) {
-					// Secuencia completada
+					// Sequence completed
 					std::cout << "Scenario 05 movement sequence completed." << std::endl;
-					// Aquí podrías agregar más lógica o cambiar a otro estado
+					// Here you could add more logic or change to another state
 					stopRobot(_leftMotor, _rightMotor);
 				}
 				break;  
 
-			// //////////////////////////////////////// ESCENARIO 05_1 ////////////////////////////////////////
+			// //////////////////////////////////////// SCENARIO 05_1 ////////////////////////////////////////
 			case SCENARIO_05_1:
                 // Specific handling for scenario 05_1
                 static std::vector<MovementStep> scenario051Sequence = {
@@ -1126,7 +1110,7 @@ void MyRobot::run()
 					{MovementStep::MOVE_FORWARD, 9.0},
 					{MovementStep::WAIT, 0.15},
 
-					{MovementStep::TURN_RIGHT, 90.0},	// Ha encontrado el primer robot; dar una vuelta completa
+					{MovementStep::TURN_RIGHT, 90.0},	// Found first robot; make complete turn
 					{MovementStep::WAIT, 0.01},
 					{MovementStep::TURN_RIGHT, 90.0},
 					{MovementStep::WAIT, 0.01},
@@ -1139,7 +1123,7 @@ void MyRobot::run()
 					{MovementStep::MOVE_FORWARD, 7.5},
 					{MovementStep::WAIT, 0.15},
 
-					{MovementStep::TURN_RIGHT, 90.0},	// Ha encontrado el segundo robot; dar una vuelta completa
+					{MovementStep::TURN_RIGHT, 90.0},	// Found second robot; make complete turn
 					{MovementStep::WAIT, 0.01},
 					{MovementStep::TURN_RIGHT, 90.0},
 					{MovementStep::WAIT, 0.01},
@@ -1174,18 +1158,18 @@ void MyRobot::run()
 				
 				std::cout << "Executing scenario 05_1 movement sequence. Step: " << currentStepIndex_51 << std::endl;
 				
-				// Ejecutar la secuencia de movimientos
+				// Execute movement sequence
 				if (executeMovementSequence(this, _leftMotor, _rightMotor, _compass, 
 					scenario051Sequence, currentStepIndex_51, stepStartTime_51, timeStep)) {
-					// Secuencia completada
+					// Sequence completed
 					std::cout << "Scenario 05_1 movement sequence completed." << std::endl;
-					// Aquí podrías agregar más lógica o cambiar a otro estado
+					// Here you could add more logic or change to another state
 					stopRobot(_leftMotor, _rightMotor);
 				}
 				break;
 
 
-			// //////////////////////////////////////// ESCENARIO 06 ////////////////////////////////////////
+			// //////////////////////////////////////// SCENARIO 06 ////////////////////////////////////////
 			case SCENARIO_06:
                 // Specific handling for scenario 06                
                 static std::vector<MovementStep> scenario06Sequence = {					
@@ -1214,7 +1198,7 @@ void MyRobot::run()
 					{MovementStep::MOVE_FORWARD, 1.0},
 					{MovementStep::WAIT, 0.15},
 
-					{MovementStep::TURN_RIGHT, 90.0},	// Ha encontrado el primer robot; dar una vuelta completa
+					{MovementStep::TURN_RIGHT, 90.0},	// Found first robot; make complete turn
 					{MovementStep::WAIT, 0.01},
 					{MovementStep::TURN_RIGHT, 90.0},
 					{MovementStep::WAIT, 0.01},
@@ -1227,7 +1211,7 @@ void MyRobot::run()
 					{MovementStep::MOVE_FORWARD, 5.0},
 					{MovementStep::WAIT, 0.15}, 
 
-					{MovementStep::TURN_RIGHT, 90.0},	// Ha encontrado el segundo robot; dar una vuelta completa
+					{MovementStep::TURN_RIGHT, 90.0},	// Found second robot; make complete turn
 					{MovementStep::WAIT, 0.01},
 					{MovementStep::TURN_RIGHT, 90.0},
 					{MovementStep::WAIT, 0.01},
@@ -1258,7 +1242,7 @@ void MyRobot::run()
 				};
 				static int currentStepIndex_6 = 0;
 				static double stepStartTime_6 = -1;
-					
+				
 				std::cout << "Executing scenario 06 movement sequence. Step: " << currentStepIndex_6 << std::endl;
 					
 				// Ejecutar la secuencia de movimientos
@@ -1271,7 +1255,7 @@ void MyRobot::run()
 				}
 			
 				break;
-
+				
 			// //////////////////////////////////////// ESCENARIO 07 ////////////////////////////////////////
 			case SCENARIO_07:
                 // Specific handling for scenario 07
@@ -1287,7 +1271,7 @@ void MyRobot::run()
 					{MovementStep::MOVE_FORWARD, 4.5},
 					{MovementStep::WAIT, 0.15},
 
-					{MovementStep::TURN_RIGHT, 90.0},	// Ha encontrado el primer robot; dar una vuelta completa
+					{MovementStep::TURN_RIGHT, 90.0},	// Found the first robot; make a complete turn
 					{MovementStep::WAIT, 0.01},
 					{MovementStep::TURN_RIGHT, 90.0},
 					{MovementStep::WAIT, 0.01},
@@ -1300,7 +1284,7 @@ void MyRobot::run()
 					{MovementStep::MOVE_FORWARD, 6.0},
 					{MovementStep::WAIT, 0.15},
 
-					{MovementStep::TURN_RIGHT, 90.0},	// Ha encontrado el segundo robot; dar una vuelta completa
+					{MovementStep::TURN_RIGHT, 90.0},	// Found the second robot; make a complete turn
 					{MovementStep::WAIT, 0.01},
 					{MovementStep::TURN_RIGHT, 90.0},
 					{MovementStep::WAIT, 0.01},
@@ -1330,25 +1314,25 @@ void MyRobot::run()
 					
 				std::cout << "Executing scenario 07 movement sequence. Step: " << currentStepIndex_7 << std::endl;
 					
-				// Ejecutar la secuencia de movimientos
+				// Execute the movement sequence
 				if (executeMovementSequence(this, _leftMotor, _rightMotor, _compass, 
 					scenario07Sequence, currentStepIndex_7, stepStartTime_7, timeStep)) {
-					// Secuencia completada
+					// Sequence completed
 					std::cout << "Scenario 07 movement sequence completed." << std::endl;
-					// Aquí podrías agregar más lógica o cambiar a otro estado
+					// Here you could add more logic or change to another state
 					stopRobot(_leftMotor, _rightMotor);
 				}
 			
 				break; 
 
 
-			// //////////////////////////////////////// ESCENARIO 08 ////////////////////////////////////////
+			// //////////////////////////////////////// SCENARIO 08 ////////////////////////////////////////
 	 		case SCENARIO_08:
                 // Specific handling for scenario 08
-				// MovementStep::WAIT - Esperar x segundos; ayuda a estabilizar las ruedas y los motores
-				// MovementStep::MOVE_FORWARD - Avanzar x segundos
-				// MovementStep::TURN_LEFT - Girar a la izquierda (180 - x) grados
-				// MovementStep::TURN_RIGHT - Girar a la derecha (180 - x) grados
+				// MovementStep::WAIT - Wait x seconds; helps stabilize wheels and motors
+				// MovementStep::MOVE_FORWARD - Move forward x seconds
+				// MovementStep::TURN_LEFT - Turn left (180 - x) degrees
+				// MovementStep::TURN_RIGHT - Turn right (180 - x) degrees
                 static std::vector<MovementStep> scenario08Sequence = {
 					{MovementStep::MOVE_FORWARD, 5.0},
 					{MovementStep::WAIT, 0.15},
@@ -1369,7 +1353,7 @@ void MyRobot::run()
 					{MovementStep::MOVE_FORWARD, 1.0},
 					{MovementStep::WAIT, 0.15},
 					
-					{MovementStep::TURN_RIGHT, 90.0},	// Ha encontrado el primer robot; dar una vuelta completa
+					{MovementStep::TURN_RIGHT, 90.0},	// Found the first robot; make a complete turn
 					{MovementStep::WAIT, 0.01},
 					{MovementStep::TURN_RIGHT, 90.0},
 					{MovementStep::WAIT, 0.01},
@@ -1382,7 +1366,7 @@ void MyRobot::run()
 					{MovementStep::MOVE_FORWARD, 1.0},
 					{MovementStep::WAIT, 0.15},
 					
-					{MovementStep::TURN_RIGHT, 90.0},	// Ha encontrado el segundo robot; dar una vuelta completa
+					{MovementStep::TURN_RIGHT, 90.0},	// Found the second robot; make a complete turn
 					{MovementStep::WAIT, 0.01},
 					{MovementStep::TURN_RIGHT, 90.0},
 					{MovementStep::WAIT, 0.01},
@@ -1409,12 +1393,12 @@ void MyRobot::run()
 				
 				std::cout << "Executing scenario 08 movement sequence. Step: " << currentStepIndex_8 << std::endl;
 				
-				// Ejecutar la secuencia de movimientos
+				// Execute the movement sequence
 				if (executeMovementSequence(this, _leftMotor, _rightMotor, _compass, 
 					scenario08Sequence, currentStepIndex_8, stepStartTime_8, timeStep)) {
-					// Secuencia completada
+					// Sequence completed
 					std::cout << "Scenario 08 movement sequence completed." << std::endl;
-					// Aquí podrías agregar más lógica o cambiar a otro estado
+					// Here you could add more logic or change to another state
 					stopRobot(_leftMotor, _rightMotor);
 				}
 				break;
@@ -1423,13 +1407,13 @@ void MyRobot::run()
 
 
 
-			// //////////////////////////////////////// ESCENARIO 09 ////////////////////////////////////////
+			// //////////////////////////////////////// SCENARIO 09 ////////////////////////////////////////
             case SCENARIO_09:
                 // Specific handling for scenario 09
-				// MovementStep::WAIT - Esperar x segundos; ayuda a estabilizar las ruedas y los motores
-				// MovementStep::MOVE_FORWARD - Avanzar x segundos
-				// MovementStep::TURN_LEFT - Girar a la izquierda (180 - x) grados
-				// MovementStep::TURN_RIGHT - Girar a la derecha (180 - x) grados
+				// MovementStep::WAIT - Wait x seconds; helps stabilize wheels and motors
+				// MovementStep::MOVE_FORWARD - Move forward x seconds
+				// MovementStep::TURN_LEFT - Turn left (180 - x) degrees
+				// MovementStep::TURN_RIGHT - Turn right (180 - x) degrees
                 static std::vector<MovementStep> scenario09Sequence = {
 					{MovementStep::WAIT, 0.15},
 					{MovementStep::TURN_LEFT, 47.0},
@@ -1449,7 +1433,7 @@ void MyRobot::run()
 					{MovementStep::MOVE_FORWARD, 7.5},
 					{MovementStep::WAIT, 0.15},
 
-					{MovementStep::TURN_RIGHT, 90.0},	// Ha encontrado el primer robot; dar una vuelta completa
+					{MovementStep::TURN_RIGHT, 90.0},	// Found the first robot; make a complete turn
 					{MovementStep::WAIT, 0.01},
 					{MovementStep::TURN_RIGHT, 90.0},
 					{MovementStep::WAIT, 0.01},
@@ -1462,7 +1446,7 @@ void MyRobot::run()
 					{MovementStep::MOVE_FORWARD, 7.5},
 					{MovementStep::WAIT, 0.15},
 
-					{MovementStep::TURN_RIGHT, 90.0},	// Ha encontrado el segundo robot; dar una vuelta completa
+					{MovementStep::TURN_RIGHT, 90.0},	// Found the second robot; make a complete turn
 					{MovementStep::WAIT, 0.01},
 					{MovementStep::TURN_RIGHT, 90.0},
 					{MovementStep::WAIT, 0.01},
@@ -1492,17 +1476,17 @@ void MyRobot::run()
 				
 				std::cout << "Executing scenario 09 movement sequence. Step: " << currentStepIndex_9 << std::endl;
 				
-				// Ejecutar la secuencia de movimientos
+				// Execute the movement sequence
 				if (executeMovementSequence(this, _leftMotor, _rightMotor, _compass, 
 											scenario09Sequence, currentStepIndex_9, stepStartTime_9, timeStep)) {
-					// Secuencia completada
+					// Sequence completed
 					std::cout << "Scenario 09 movement sequence completed." << std::endl;
-					// Aquí podrías agregar más lógica o cambiar a otro estado
+					// Here you could add more logic or change to another state
 					stopRobot(_leftMotor, _rightMotor);
 				}
 				break;
 
-			// //////////////////////////////////////// ESCENARIO 10 ////////////////////////////////////////
+			// //////////////////////////////////////// SCENARIO 10 ////////////////////////////////////////
             case SCENARIO_10:
                 // Specific handling for scenario 10
                 static std::vector<MovementStep> scenario10Sequence = {
@@ -1532,7 +1516,7 @@ void MyRobot::run()
 					{MovementStep::MOVE_FORWARD, 3.0},
 					{MovementStep::WAIT, 0.15},
 
-					{MovementStep::TURN_RIGHT, 90.0},	// Ha encontrado el primer robot; dar una vuelta completa
+					{MovementStep::TURN_RIGHT, 90.0},	// Found the first robot; make a complete turn
 					{MovementStep::WAIT, 0.01},
 					{MovementStep::TURN_RIGHT, 90.0},
 					{MovementStep::WAIT, 0.01},
@@ -1545,7 +1529,7 @@ void MyRobot::run()
 					{MovementStep::MOVE_FORWARD, 2.0},
 					{MovementStep::WAIT, 0.15},
 
-					{MovementStep::TURN_RIGHT, 90.0},	// Ha encontrado el segundo robot; dar una vuelta completa
+					{MovementStep::TURN_RIGHT, 90.0},	// Found the second robot; make a complete turn
 					{MovementStep::WAIT, 0.01},
 					{MovementStep::TURN_RIGHT, 90.0},
 					{MovementStep::WAIT, 0.01},
@@ -1588,12 +1572,12 @@ void MyRobot::run()
 				
 				std::cout << "Executing scenario 10 movement sequence. Step: " << currentStepIndex_10 << std::endl;
 				
-				// Ejecutar la secuencia de movimientos
+				// Execute the movement sequence
 				if (executeMovementSequence(this, _leftMotor, _rightMotor, _compass, 
 					scenario10Sequence, currentStepIndex_10, stepStartTime_10, timeStep)) {
-					// Secuencia completada
+					// Sequence completed
 					std::cout << "Scenario 10 movement sequence completed." << std::endl;
-					// Aquí podrías agregar más lógica o cambiar a otro estado
+					// Here you could add more logic or change to another state
 					stopRobot(_leftMotor, _rightMotor);
 				}
 				break;
@@ -1602,59 +1586,59 @@ void MyRobot::run()
 
 }
 
-// Función para convertir grados a radianes
+// Function to convert degrees to radians
 inline double MyRobot::degToRad(double degrees) {
     return degrees * M_PI / 180.0;
 }
 
 
-// Función para ejecutar una secuencia de movimientos
+// Function to execute a movement sequence
 bool MyRobot::executeMovementSequence(Robot* robot, Motor* leftMotor, Motor* rightMotor, Compass* compass,
                              std::vector<MovementStep>& sequence, int& currentStepIndex, 
                              double& stepStartTime, int timeStep) {
     
-    // Si hemos completado la secuencia
+    // If we have completed the sequence
     if (currentStepIndex >= sequence.size()) {
         return true;
     }
     
-    // Obtener el paso actual
+    // Get the current step
     MovementStep& currentStep = sequence[currentStepIndex];
     
-    // Si es el inicio del paso actual, guardamos el tiempo
+    // If this is the start of the current step, save the time
     if (stepStartTime < 0) {
         stepStartTime = robot->getTime();
         
-        // Configurar el movimiento según el tipo
+        // Configure the movement according to the type
         switch (currentStep.type) {
             case MovementStep::WAIT:
             case MovementStep::STOP:
-                // Detener el robot
+                // Stop the robot
                 leftMotor->setVelocity(0);
                 rightMotor->setVelocity(0);
                 break;
                 
             case MovementStep::MOVE_FORWARD:
-                // Avanzar
-                leftMotor->setVelocity(10.0);  // Velocidad ajustable
+                // Move forward
+                leftMotor->setVelocity(10.0);  // Adjustable speed
                 rightMotor->setVelocity(10.0);
                 break;
                 
             case MovementStep::TURN_LEFT:
             case MovementStep::TURN_RIGHT:
-                // La lógica de giro se maneja en el caso siguiente
+                // Turn logic is handled in the following case
                 break;
         }
     }
     
-    // Lógica específica para cada tipo de paso
+    // Specific logic for each step type
     switch (currentStep.type) {
         case MovementStep::WAIT:
         case MovementStep::STOP:
         case MovementStep::MOVE_FORWARD:
-            // Para espera, parada o avance, simplemente esperamos el tiempo especificado
+            // For wait, stop, or forward movement, simply wait for the specified time
             if (robot->getTime() - stepStartTime >= currentStep.value) {
-                // Pasar al siguiente paso
+                // Move to the next step
                 currentStepIndex++;
                 stepStartTime = -1;
             }
@@ -1662,37 +1646,37 @@ bool MyRobot::executeMovementSequence(Robot* robot, Motor* leftMotor, Motor* rig
             
         case MovementStep::TURN_LEFT:
         case MovementStep::TURN_RIGHT: {
-            // Para giros, necesitamos calcular la orientación objetivo
+            // For turns, we need to calculate the target orientation
             
-            // Obtener la orientación actual
+            // Get the current orientation
             const double* compassValues = compass->getValues();
             
-            // Calcular el ángulo actual (en el plano XZ)
+            // Calculate the current angle (in the XZ plane)
             double currentAngle = atan2(compassValues[0], compassValues[2]);
             
-            // Calcular el ángulo objetivo
+            // Calculate the target angle
             double targetAngleChange = degToRad(currentStep.value);
             if (currentStep.type == MovementStep::TURN_RIGHT) {
                 targetAngleChange = -targetAngleChange;
             }
             
-            // Si es el inicio del giro, guardamos el ángulo inicial y calculamos el objetivo
+            // If this is the start of the turn, save the initial angle and calculate the target
             static double initialAngle = 0;
             static double targetAngle = 0;
             
             if (robot->getTime() - stepStartTime < timeStep/1000.0) {
                 initialAngle = currentAngle;
                 targetAngle = initialAngle + targetAngleChange;
-                // Normalizar el ángulo objetivo entre -PI y PI
+                // Normalize the target angle between -PI and PI
                 while (targetAngle > M_PI) targetAngle -= 2*M_PI;
                 while (targetAngle < -M_PI) targetAngle += 2*M_PI;
             }
             
-            // Calcular diferencia entre ángulo actual y objetivo
+            // Calculate difference between current angle and target
             double angleDiff = targetAngle - currentAngle;
 			double angleDiff2 = targetAngle - currentAngle - M_PI;
 			double angleDiff3 = targetAngle - currentAngle + M_PI;
-            // Normalizar la diferencia entre -PI y PI
+            // Normalize the difference between -PI and PI
             while (angleDiff > M_PI) angleDiff -= 2*M_PI;
             while (angleDiff < -M_PI) angleDiff += 2*M_PI;
 			while (angleDiff2 > M_PI) angleDiff2 -= 2*M_PI;
@@ -1700,27 +1684,27 @@ bool MyRobot::executeMovementSequence(Robot* robot, Motor* leftMotor, Motor* rig
 			while (angleDiff3 > M_PI) angleDiff3 -= 2*M_PI;
 			while (angleDiff3 < -M_PI) angleDiff3 += 2*M_PI;
 
-			// DEBUG: imprimir ángulo actual y objetivo
-			std::cout << "Ángulo actual: " << currentAngle << ", Ángulo objetivo: " << targetAngle << std::endl;
-			// Cuando el ángulo actual y el objetivo son iguales, realmente sale esto: [full_controller] Ángulo actual: -1.0973, Ángulo objetivo: 2.09729
-			// Para solucionarlo, angleDiff debería ser la resta de los dos ángulos o la resta de uno - PI y del otro o la resta de uno y del otro - PI
+			// DEBUG: print current and target angle
+			std::cout << "Current angle: " << currentAngle << ", Target angle: " << targetAngle << std::endl;
+			// When the current angle and target are equal, this actually outputs: [full_controller] Current angle: -1.0973, Target angle: 2.09729
+			// To fix this, angleDiff should be the subtraction of the two angles or the subtraction of one - PI and the other or the subtraction of one and the other - PI
 			
             
-            // Velocidad de giro proporcional a la diferencia de ángulo
-            double turnSpeed = 2.0;  // Velocidad base ajustable
+            // Turn speed proportional to angle difference
+            double turnSpeed = 2.0;  // Adjustable base speed
             
             if ((fabs(angleDiff) < degToRad(2.0)) || (fabs(angleDiff2) < degToRad(2.0)) || (fabs(angleDiff3) < degToRad(2.0))) {
-                // Si estamos cerca del objetivo, paramos y pasamos al siguiente paso
+                // If we're close to the target, stop and move to the next step
                 leftMotor->setVelocity(0);
                 rightMotor->setVelocity(0);
                 currentStepIndex++;
                 stepStartTime = -1;
             } else if (angleDiff > 0) {
-                // Girar a la izquierda
+                // Turn left
                 leftMotor->setVelocity(-turnSpeed);
                 rightMotor->setVelocity(turnSpeed);
             } else {
-                // Girar a la derecha
+                // Turn right
                 leftMotor->setVelocity(turnSpeed);
                 rightMotor->setVelocity(-turnSpeed);
             }
@@ -1728,31 +1712,31 @@ bool MyRobot::executeMovementSequence(Robot* robot, Motor* leftMotor, Motor* rig
         }
     }
     
-    return false;  // La secuencia no se ha completado todavía
+    return false;  // The sequence has not been completed yet
 }
 
-// Función para detener el robot
+// Function to stop the robot
 void MyRobot::stopRobot(Motor* leftMotor, Motor* rightMotor) {
     leftMotor->setVelocity(0);
     rightMotor->setVelocity(0);
 }
 
-// Función para mover el robot hacia adelante
+// Function to move the robot forward
 void MyRobot::moveForward(Motor* leftMotor, Motor* rightMotor, double speed) {
-	// DEBUG: imprimir velocidad
-	std::cout << "Moviendo hacia adelante a " << speed << " m/s" << std::endl;
+	// DEBUG: print speed
+	std::cout << "Moving forward at " << speed << " m/s" << std::endl;
 
     leftMotor->setVelocity(speed);
     rightMotor->setVelocity(speed);
 }
 
-// Función para detectar colisiones usando los sensores de distancia
+// Function to detect collisions using distance sensors
 bool MyRobot::isCollisionDetected(DistanceSensor* distance_sensors[]) {
-	// Umbral para detectar colisiones (ajustar según sea necesario)
+	// Threshold to detect collisions (adjust as needed)
 	const double COLLISION_THRESHOLD = 100.0;
 
-	// Verificar los sensores frontales (ds0, ds15, ds1)
-	// Los índices pueden necesitar ajustes dependiendo de la configuración exacta
+	// Check the front sensors (ds0, ds15, ds1)
+	// Indices may need adjustments depending on the exact configuration
 	if (distance_sensors[0]->getValue() > COLLISION_THRESHOLD
 		|| distance_sensors[15]->getValue() > COLLISION_THRESHOLD 
 		|| distance_sensors[1]->getValue() > COLLISION_THRESHOLD) {
@@ -1763,95 +1747,95 @@ bool MyRobot::isCollisionDetected(DistanceSensor* distance_sensors[]) {
 }
 
 /**
- * Gira el robot hacia una orientación específica
- * @param robot Puntero al objeto Robot
- * @param compass Puntero al sensor brújula
- * @param leftMotor Puntero al motor izquierdo
- * @param rightMotor Puntero al motor derecho
- * @param targetOrientation Vector de orientación objetivo [x, y, z]
- * @param tolerance Tolerancia permitida para considerar que se ha alcanzado la orientación
- * @param timeStep Paso de tiempo para la simulación
- * @return true cuando se ha alcanzado la orientación deseada
+ * Turns the robot to a specific orientation
+ * @param robot Pointer to the Robot object
+ * @param compass Pointer to the compass sensor
+ * @param leftMotor Pointer to the left motor
+ * @param rightMotor Pointer to the right motor
+ * @param targetOrientation Target orientation vector [x, y, z]
+ * @param tolerance Allowed tolerance to consider the orientation has been reached
+ * @param timeStep Time step for the simulation
+ * @return true when the desired orientation has been reached
  */
 bool MyRobot::turnToOrientation(Robot* robot, Compass* compass, Motor* leftMotor, Motor* rightMotor, const double targetOrientation[3], double tolerance, int timeStep) {
-	// Velocidades para el giro
+	// Turn speeds
 	const double TURN_SPEED = 1.5;
 
-	// Obtener los valores actuales de la brújula
+	// Get the current compass values
 	const double* compassValues = compass->getValues();
 
 	if (compassValues == NULL) {
-		std::cout << "Error: No se pueden leer los valores de la brújula" << std::endl;
+		std::cout << "Error: Cannot read compass values" << std::endl;
 		return false;
 	}
 
-	// Calcular el producto escalar entre la orientación actual y la deseada
+	// Calculate the dot product between the current and desired orientation
 	double dotProduct = compassValues[0] * targetOrientation[0] + compassValues[1] * targetOrientation[1] + compassValues[2] * targetOrientation[2];
 
-	// Normalizar los vectores
+	// Normalize the vectors
 	double currentMagnitude = sqrt(compassValues[0]*compassValues[0] + compassValues[1]*compassValues[1] + compassValues[2]*compassValues[2]);
 
 	double targetMagnitude = sqrt(targetOrientation[0]*targetOrientation[0] + targetOrientation[1]*targetOrientation[1] + targetOrientation[2]*targetOrientation[2]);
 
-	// Calcular el coseno del ángulo entre los vectores
+	// Calculate the cosine of the angle between the vectors
 	double cosAngle = dotProduct / (currentMagnitude * targetMagnitude);
 
-	// Asegurar que cosAngle está en el rango [-1, 1]
+	// Ensure cosAngle is in the range [-1, 1]
 	if (cosAngle > 1.0) cosAngle = 1.0;
 	if (cosAngle < -1.0) cosAngle = -1.0;
 
-	// Calcular el ángulo en radianes
+	// Calculate the angle in radians
 	double angle = acos(cosAngle);
 
-	// Verificar si ya estamos en la orientación correcta (dentro de la tolerancia)
+	// Check if we are already in the correct orientation (within tolerance)
 	if (angle < tolerance) {
-		// Detener los motores
+		// Stop the motors
 		leftMotor->setVelocity(0);
 		rightMotor->setVelocity(0);
 		return true;
 	}
 
-	// Determinar la dirección de giro (derecha o izquierda)
-	// Para esto, usamos el producto vectorial para determinar si debemos girar en sentido horario o antihorario
+	// Determine the turn direction (right or left)
+	// For this, we use the cross product to determine if we should turn clockwise or counterclockwise
 	double crossProduct[3];
 	crossProduct[0] = compassValues[1] * targetOrientation[2] - compassValues[2] * targetOrientation[1];
 	crossProduct[1] = compassValues[2] * targetOrientation[0] - compassValues[0] * targetOrientation[2];
 	crossProduct[2] = compassValues[0] * targetOrientation[1] - compassValues[1] * targetOrientation[0];
 
-	// El signo de la componente Y del producto vectorial nos indica la dirección de giro
+	// The sign of the Y component of the cross product indicates the turn direction
 	bool turnRight = (crossProduct[1] > 0);
 
-	// Establecer velocidades para el giro
+	// Set velocities for the turn
 	if (turnRight) {
-		// Girar a la derecha
-		std::cout << "Girando a la derecha" << std::endl;
+		// Turn right
+		std::cout << "Turning right" << std::endl;
 		leftMotor->setVelocity(TURN_SPEED);
 		rightMotor->setVelocity(-TURN_SPEED);
 	} else {
-		// Girar a la izquierda
-		std::cout << "Girando a la izquierda" << std::endl;
+		// Turn left
+		std::cout << "Turning left" << std::endl;
 		leftMotor->setVelocity(-TURN_SPEED);
 		rightMotor->setVelocity(TURN_SPEED);
 	}
 
-	// Aún no hemos alcanzado la orientación deseada
+	// We have not yet reached the desired orientation
 	return false;
 }
 
-// Función para detectar el escenario basado en colores y conteos de píxeles
+// Function to detect the scenario based on colors and pixel counts
 std::string MyRobot::detect_scenario(const std::vector<std::tuple<int, int, int>>& colors, 
                            const std::vector<int>& pixel_counts) {
-    // Si no hay colores, no podemos detectar nada
+    // If there are no colors, we cannot detect anything
     if (colors.empty()) {
         return "unknown";
     }
     
-    // Obtener componentes del primer color dominante
+    // Get components of the first dominant color
     int r0 = std::get<0>(colors[0]);
     int g0 = std::get<1>(colors[0]);
     int b0 = std::get<2>(colors[0]);
     
-    // Los escenarios 1, 8 y 10 tienen colores similares
+    // Scenarios 1, 8 and 10 have similar colors
     if (r0 == 50 && g0 == 120 && b0 == 120 && colors.size() > 1) {
         int r1 = std::get<0>(colors[1]);
         int g1 = std::get<1>(colors[1]);
@@ -1862,9 +1846,9 @@ std::string MyRobot::detect_scenario(const std::vector<std::tuple<int, int, int>
         }
     }
 
-	// Escenario 3 (con múltiples colores en tonos específicos y negro)
+	// Scenario 3 (with multiple colors in specific shades and black)
 	if ((r0 == 70 && g0 == 160 && b0 == 160) || (r0 == 60 && g0 == 140 && b0 == 140)) {
-		// Verificar si existe el color negro en los primeros 5 colores
+		// Check if black color exists in the first 5 colors
 		for (int i = 0; i < std::min(5, (int)colors.size()); i++) {
 			int r = std::get<0>(colors[i]);
 			int g = std::get<1>(colors[i]);
@@ -1877,22 +1861,24 @@ std::string MyRobot::detect_scenario(const std::vector<std::tuple<int, int, int>
 	}
 
     
-    // Para escenarios 4, 5 (caso 0), 6 y 7 con color dominante (80,190,190)
+    // For scenarios 4, 5 (case 0), 6 and 7 with dominant color (80,190,190)
     else if (r0 == 80 && g0 == 190 && b0 == 190) {
         return "04y05y06y07";
     }	
 
-	// Para escenario 5 (caso 1) con color dominante (70,170,170)
+	// For scenario 5 (case 1) with dominant color (70,170,170)
     else if (r0 == 70 && g0 == 170 && b0 == 170) {
         
         return "05";
     }
-    // Para escenario 2 con color dominante (80,180,180)
+    
+    // For scenario 2 with dominant color (80,180,180)
     else if (r0 == 80 && g0 == 180 && b0 == 180 && colors.size() == 1) {
         return "02";
     }
     
-    // Si no coincide con ningún patrón conocido
+    // If it doesn't match any known pattern
     return "unknown";
 }
-//////////////////////////////////////////////
+//////////////////////////////////////////////				
+					
