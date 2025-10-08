@@ -276,11 +276,6 @@ Once the scenario is identified, the robot executes an optimized and predefined 
 - Use the 2020a version of Webots for better stability
 - Reduce graphical quality if experiencing lag (Edit → Preferences → OpenGL)
 
-## 📹 Supplementary Material
-[Google Drive folder](https://drive.google.com) with videos and screenshots of all scenarios.
-
-Includes exhaustive tests with different initial orientations to validate system robustness.
-
 ## 📖 Additional Documentation
 
 For more detailed information about the implementation, algorithms, and methodology, please refer to the complete project report (in Spanish):
@@ -303,7 +298,9 @@ This comprehensive document includes:
 
 ## 📝 License
 Academic Project - Universidad Carlos III de Madrid © 2024-2025
+
 The code is provided for educational and reference purposes only.
+
 Exception: The Makefile uses Apache License 2.0 (Copyright 1996-2020 Cyberbotics Ltd.)
 
 ## 📧 Contact
