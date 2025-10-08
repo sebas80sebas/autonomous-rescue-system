@@ -281,6 +281,19 @@ Once the scenario is identified, the robot executes an optimized and predefined 
 
 Includes exhaustive tests with different initial orientations to validate system robustness.
 
+## 📖 Additional Documentation
+
+For more detailed information about the implementation, algorithms, and methodology, please refer to the complete project report (in Spanish):
+
+**📄 Report:** `docs/Informe_Practica_6.pdf`
+
+This comprehensive document includes:
+- Detailed explanation of the scenario identification algorithm
+- Complete route optimization methodology
+- In-depth analysis of sensor usage and calibration
+- Extended discussion of results and performance metrics
+- Technical diagrams and flowcharts
+
 ## 🔮 Future Work
 - Improve precision of movement and orientation functions 
 - Eliminate dependence on collisions for identification 
